@@ -1,8 +1,8 @@
 import React from "react";
 import { FlashMessage } from "../AuthPages/FlashMessage";
-import { resetPasswordFun, refreshToken,checkAccess,decodeJWT } from "../../utils";
+import { resetPasswordFun, refreshToken,checkAccess,decodeJWT,getAllProduct } from "../../utils";
 class Proflie extends React.Component{
-
+    
     constructor(props){
         super(props);
         this.state={
@@ -26,7 +26,21 @@ class Proflie extends React.Component{
     }
     onFormSubmited(e){
         e.preventDefault();
-        console.log(decodeJWT());
+        getAllProduct().then(response => {
+            
+            let {body,status}=response
+            console.log(body,status)
+            if (status === 200) {
+                // let refresh=body.refresh;
+                // let access=body.access;
+                // props.setTokens(refresh, access)
+                // noErorr();
+                // navigate("/")
+    
+            } else {
+                // thereIsErorr("Wrong Email/Password")
+            }
+        });
     }
     render(){
         return (

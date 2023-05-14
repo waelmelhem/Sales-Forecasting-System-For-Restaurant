@@ -29,19 +29,19 @@ export const guest_nav_struct = [
 ]
 export const admin_nav_struct = [
     {
-        name: 'admin1',
+        name: 'products',
         isActive: true,
-        path: '/profile',
+        path: '/products',
     },
     {
-        name: 'admin2',
+        name: 'orders',
         isActive: false,
-        path: '/login',
+        path: '/orders',
     },
     {
-        name: 'admin3',
+        name: 'Data ',
         isActive: false,
-        path: '/Logout',
+        path: '/data',
     },
     {
         name: 'Logout',

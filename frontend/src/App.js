@@ -6,6 +6,9 @@ import './App.scss'
 import NavBar from './Components/NavBar/NavBar';
 import Login from './Pages/AuthPages/Login';
 import SignUp from './Pages/AuthPages/SignUp';
+import AllProducts from './Pages/Admin/AllProducts'; 
+import Data from './Pages/Admin/Data'; 
+import Orders from './Pages/Admin/Orders'; 
 import Profile from "./Pages/Dashboard/Profile"
 import WelcomePage from "./Pages/Dashboard/WelcomePage"
 import { SignUpFun,LoginFun,resetPasswordFun,REFRESH_TIME_LIFE,ACCESS_TIME_LIFE,removeStorage,checkAccess,setStorage,decodeJWT,set_user_data,} from './utils';
@@ -67,10 +70,24 @@ class App extends React.Component {
           <Route path='/' element={<RequireAuth idToken={this.state.access}><WelcomePage/></RequireAuth>}/>
           <Route path='/login' element={<Guest idToken={this.state.access}><Login setTokens={this.setTokens.bind(this)}/></Guest>}/>
           <Route path='/signup' element={<Guest idToken={this.state.access}><SignUp setTokens={this.setTokens.bind(this)}/></Guest>}/>
-          <Route path='/profile' element={
+          <Route path='/products' element={
             <RequireAuth idToken={this.state.access}>
               <SuperUser is_super={this.state.is_superuser}>
-                <Profile/>
+                <AllProducts/>
+              </SuperUser>
+            </RequireAuth>
+          }/>
+          <Route path='/orders' element={
+            <RequireAuth idToken={this.state.access}>
+              <SuperUser is_super={this.state.is_superuser}>
+                <Orders/>
+              </SuperUser>
+            </RequireAuth>
+          }/>
+          <Route path='/data' element={
+            <RequireAuth idToken={this.state.access}>
+              <SuperUser is_super={this.state.is_superuser}>
+                <Data/>
               </SuperUser>
             </RequireAuth>
           }/>

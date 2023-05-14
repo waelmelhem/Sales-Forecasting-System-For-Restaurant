@@ -1,6 +1,6 @@
 const HOST_NAME="http://127.0.0.1:8000"
 export const REFRESH_TIME_LIFE=(24 * 60 * 60 * 1000)
-export const ACCESS_TIME_LIFE=(1 * 5 * 1000)
+export const ACCESS_TIME_LIFE=(5 * 60 * 1000)
 export async function SignUpFun(email,name,password) {
     let url=`${HOST_NAME}/api/user/create/`
     console.log(email,name,password);
@@ -37,6 +37,24 @@ export async function LoginFun(email,password) {
             "accept":"application/json",
         },
         body: JSON.stringify(data)
+    });
+    // console.log(response);
+    return {
+        body:await response.json(),
+        status:response.status
+    }
+}
+export async function getAllProduct() {
+
+    let url=`${HOST_NAME}/api/allproduct/`
+    await checkAccess();
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            "accept":"application/json",
+            "Authorization":`JWT ${localStorage.getItem("access")}`
+        }
     });
     // console.log(response);
     return {
@@ -181,4 +199,60 @@ export function  select_nav_struct(token){
         return user_nav_struct;
     }
     return guest_nav_struct;
+}
+export async function get_product_Production(id) {
+
+    let url=`${HOST_NAME}/api/predict/${id}/`
+    await checkAccess();
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            "accept":"application/json",
+            "Authorization":`JWT ${localStorage.getItem("access")}`
+        }
+    });
+    // console.log(response);
+    return {
+        body:await response.json(),
+        status:response.status
+    }
+}
+export async function UplodeDataFile(label,file) {
+    console.log(label,file)
+    let url=`${HOST_NAME}/api/file/`
+    await checkAccess();
+    const formData = new FormData();
+    formData.append('label',label);
+    formData.append('file', file);
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            "Authorization":`JWT ${localStorage.getItem("access")}`
+        },
+        body: formData
+    });
+    console.log(response);
+    return {
+        body:await response.json(),
+        status:response.status,
+    }
+}
+
+export async function get_user_files() {
+
+    let url=`${HOST_NAME}/api/user/files/`
+    await checkAccess();
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            "accept":"application/json",
+            "Authorization":`JWT ${localStorage.getItem("access")}`
+        }
+    });
+    return {
+        body:await response.json(),
+        status:response.status,
+    }
 }

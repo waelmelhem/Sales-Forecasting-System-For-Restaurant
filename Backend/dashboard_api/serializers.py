@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Order, ProductOrder
+from .models import Product, Order, ProductOrder,Files
 from rest_framework import permissions
 
 
@@ -22,7 +22,14 @@ class ProductOrderSerializer(serializers.ModelSerializer):
         
 
 from .models import UploadedFile
-class UploadedFileSerializer(serializers.ModelSerializer):
+class FileSerializer(serializers.ModelSerializer):
+    def get_user(self, obj):
+        return self.context.get('user')
     class Meta:
-        model = UploadedFile
-        fields = ('file',)
+        model = Files
+        fields = ['id', 'label', 'file']
+    
+class FileListSerializer(FileSerializer):
+    class Meta:
+        model = Files
+        fields = ('id', 'label','status')
