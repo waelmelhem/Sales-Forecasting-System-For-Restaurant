@@ -8,7 +8,8 @@ urlpatterns = [
     path('predict/<int:product_id>/', PredictProductsView.as_view(), name='predict_products'),
     path('predict/orders', PredictOrdersView.as_view(), name='predict_orders'),
     path('makemodel',my_view.as_view(), name='predict'),
-    path('file/<uuid>/', FileView.as_view(), name='file-detail'),
     path('file/', UplodeFileView.as_view(), name='file-upload'),
+    path('file/<uuid>/', FileView.as_view(), name='file-detail'),
+    
     path('user/files/', UserFilesView.as_view(), name='get-files'),
 ]

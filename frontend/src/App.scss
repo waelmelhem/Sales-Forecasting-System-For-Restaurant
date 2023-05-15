@@ -217,8 +217,7 @@ body {
   background-color: "#f3f3f3";
   box-shadow: 1px 2px 9px #1C2331;
 
-  margin-left: 100px;
-  // min-width: 300px;
+  min-width: 300px;
   width: fit-content;
 
 
@@ -226,12 +225,18 @@ body {
     margin-top: 7px;
   }
 }
-table {
-  overflow: hidden;
+.table-responsive {
   background-color: "#f3f3f3";
   box-shadow: 1px 2px 9px #1C2331;
-  // margin-right: 20px;
-  // width: 500px;
+  min-width: 850px;
+  width: fit-content;
+  margin-bottom: 20px;
+  max-height: 580px;
+  height: fit-content;
+  max-height: fit-content;
+  overflow-y: auto;
+  
+
 }
 
 .container {

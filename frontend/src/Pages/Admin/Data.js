@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { UplodeDataFile, get_user_files } from '../../utils';
+import { UplodeDataFile, download_file, get_user_files } from '../../utils';
 import { Modal, Button } from 'react-bootstrap';
 class Data extends Component {
     constructor(props) {
@@ -45,38 +45,83 @@ class Data extends Component {
         event.preventDefault();
         UplodeDataFile(this.state.label, this.state.file).then(response => {
             let { body, status } = response;
-            console.log(body, status)
+            get_user_files().then(response => {
+                let { body, status } = response;
+                if (status === 200) {
+                    this.setState({
+                        files: [...body].reverse()
+                    })
+                } else {
+
+                }
+            });
 
         });
     };
-    handleDownload(id) {
-        // make API call to download file with given id
-        window.open(`/api/file/${id}/download/`, '_blank');
-    }
+    handleDownload(id, label) {
+        const fileUrl = `http://127.0.0.1:8000/api/file/${id}/`;
 
+        fetch(fileUrl, {
+            headers: {
+                Authorization: `JWT ${localStorage.getItem('access')}`, // Replace with your authentication token
+            },
+        })
+            .then(response => {
+                const filenameHeader = response.headers.get('Content-Disposition');
+                const filename = `${label}.csv`
+
+                return response.blob().then(blob => {
+                    // Create a temporary URL for the blob object
+                    const url = URL.createObjectURL(blob);
+
+                    // Create a link element and simulate a click to trigger the download
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    link.click();
+
+                    // Clean up the temporary URL
+                    URL.revokeObjectURL(url);
+                });
+            })
+            .catch(error => console.error(error));
+    };
     handleDelete(id) {
         this.setState({ showModal: true, deleteFileId: id });
     }
 
-    confirmDelete() {
-        const id = this.state.deleteFileId;
-        // make API call to delete file with given id
-        fetch(`/api/file/${id}/`, {
+    confirmDelete = (id) => {
+        const url = `http://127.0.0.1:8000/api/file/${id}`;
+
+        fetch(url, {
             method: 'DELETE',
             headers: {
-                'Authorization': `JWT ${localStorage.getItem('access')}`
-            }
+                'Content-Type': 'application/json',
+                "Authorization": `JWT ${localStorage.getItem("access")}`
+            },
         })
             .then(response => {
+                console.log(response.body)
                 if (response.ok) {
-                    // remove file from state if delete was successful
-                    const updatedFiles = this.state.files.filter(file => file.id !== id);
-                    this.setState({ files: updatedFiles, showModal: false, deleteFileId: null });
+                    this.cancelDelete();
+                    get_user_files().then(response => {
+                        let { body, status } = response;
+                        if (status === 200) {
+                            this.setState({
+                                files: [...body].reverse()
+                            })
+                        } else {
+
+                        }
+                    });
                 } else {
-                    throw new Error('Failed to delete file');
+                    // Handle error response
+                    // You can parse the response body using response.json()
                 }
             })
-            .catch(error => console.error(error));
+            .catch(error => {
+                // Handle network or other errors
+            });
     }
 
     cancelDelete() {
@@ -87,7 +132,7 @@ class Data extends Component {
             <div className="container">
                 <div className="row">
                     <div className="col-xs-12 col-md-9">
-                        <div className="table-responsive">
+                        <div className="table-responsive" >
                             <table className="table table-striped table-hover table-light">
                                 <thead>
                                     <tr>
@@ -107,7 +152,7 @@ class Data extends Component {
                                             <td>
                                                 <button
                                                     className="btn btn-primary"
-                                                    onClick={() => this.handleDownload(file.id)}
+                                                    onClick={() => this.handleDownload(file.id, file.label)}
                                                 >
                                                     Download
                                                 </button>
@@ -133,7 +178,7 @@ class Data extends Component {
                                     <Button variant="secondary" onClick={() => this.cancelDelete()}>
                                         Cancel
                                     </Button>
-                                    <Button variant="danger" onClick={() => this.confirmDelete()}>
+                                    <Button variant="danger" onClick={() => this.confirmDelete(this.state.deleteFileId)}>
                                         Delete
                                     </Button>
                                 </Modal.Footer>

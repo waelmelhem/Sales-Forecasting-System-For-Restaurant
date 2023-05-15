@@ -215,9 +215,10 @@ class UplodeFileView(APIView):
                             # Create product order
                             product_order_data = {'order_id': order_id, 'product_id': product_id, 'quantity': row['Quantity']}
                             ProductOrder.objects.create(**product_order_data)
-                        
+                    file_serializer.save(status="File uploaded successfully")
                     return Response({'success': 'File uploaded successfully.'}, status=status.HTTP_201_CREATED)
                 except Exception as e:
+                    file_serializer.save(status="Invalid file Data")
                     return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         else:
@@ -228,27 +229,28 @@ class UserFilesView(APIView):
 
     def get(self, request):
         user_id = request.user.id
-        files = Files.objects.filter(user=user_id)
+        files = Files.objects.all()
         serializer = FileListSerializer(files, many=True)
         return Response(serializer.data)
 
 class FileView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
-    # def get(self, request, uuid):
-    #     try:
-    #         # Get the file object by UUID and user
-    #         file = Files.objects.get(id=uuid)
-    #     except Files.DoesNotExist:
-    #         return HttpResponseNotFound()
+    def get(self, request, uuid):
+        try:
+            # Get the file object by UUID and user
+            file = Files.objects.get(id=uuid)
+        except Files.DoesNotExist:
+            return HttpResponseNotFound()
 
-    #     # Open the file and create a response with the file contents
-    #     file_handle = file.file.open('rb')
-    #     response = FileResponse(file_handle)
-    #     response['Content-Disposition'] = f'attachment; filename="{file.label}"'
-        # return response
+        # Open the file and create a response with the file contents
+        file_handle = file.file.open('rb')
+        response = FileResponse(file_handle)
+        response['Content-Disposition'] = f'attachment; filename="{file.label}"'
+        return response
 
     def delete(self, request, uuid):
+        
         user = request.user
         file = get_object_or_404(Files, id=uuid)
         file_path = file.file.path

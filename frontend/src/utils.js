@@ -256,3 +256,39 @@ export async function get_user_files() {
         status:response.status,
     }
 }
+export async function download_file(id) {
+
+    let url=`${HOST_NAME}/api/file/${id}`
+    await checkAccess();
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            "accept":"application/json",
+            "Authorization":`JWT ${localStorage.getItem("access")}`
+        }
+    });
+    
+    return {
+        body:await response.json(),
+        status:response.status,
+    }
+    
+}
+export async function getOrdersPrediction() {
+
+    let url=`${HOST_NAME}/api/predict/orders`
+    await checkAccess();
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            "accept":"application/json",
+            "Authorization":`JWT ${localStorage.getItem("access")}`
+        }
+    });
+    // console.log(response);
+    return {
+        body:await response.json(),
+        status:response.status
+    }
+}
