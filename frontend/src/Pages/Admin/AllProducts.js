@@ -1,4 +1,5 @@
 //coded by Ahmad Saleh
+import { CircularProgress } from "@mui/material";
 import * as React from "react";
 import  { useState, useEffect } from 'react';
 import { DataGrid } from "@mui/x-data-grid";
@@ -129,6 +130,7 @@ export default function AllProducts() {
 
     return (
         <div style={{ height: "auto", width: "100%", position: "relative" }}>
+            
             <DataGrid
                 initialState={{
                     pagination: {

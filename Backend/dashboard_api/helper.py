@@ -46,9 +46,10 @@ def predict_orders_for_one_week(day_date):
         }
     }
 
-
+from django.db.models.functions import Trunc
 def day_orders(day_date):
-    return Order.objects.filter(date__date=day_date).count()
+    next_day = day_date + timedelta(days=1)
+    return Order.objects.filter(date__range=(day_date, next_day)).count()
     # return orders_count
 
 

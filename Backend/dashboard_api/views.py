@@ -1,3 +1,5 @@
+import csv
+from django.db import transaction
 import pandas as pd
 from django.db.models.functions import TruncWeek
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -98,8 +100,7 @@ class PredictOrdersView(APIView):
         actual_values = [None]
 
         last_order_date = Order.objects.last().date
-        tom = (last_order_date + timedelta(days=1)
-               ).replace(hour=0, minute=0, second=0, microsecond=0)
+        tom = (last_order_date + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
 
         yesterday = (tom - timedelta(days=1)).replace(hour=0,
                                                       minute=0, second=0, microsecond=0)
@@ -111,8 +112,7 @@ class PredictOrdersView(APIView):
                                   ]["actual"] = actual_values[len(actual_values)-1]
             actual_values.append(
                 result[len(result)-1][tom.strftime("%Y-%m-%d")]["input"]["yesterday_number"][0])
-            tom = (tom - timedelta(days=1)).replace(hour=0,
-                                                    minute=0, second=0, microsecond=0)
+            tom = (tom - timedelta(days=1)).replace(hour=0,minute=0, second=0, microsecond=0)
 
         for result_dict in result:
             if result_dict is not None:
@@ -184,8 +184,7 @@ class my_view(APIView):
     #     else:
     #         return Response(file_serializer.errors, status=400)
 
-import csv
-from django.db import transaction
+
 class UplodeFileView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
@@ -199,7 +198,7 @@ class UplodeFileView(APIView):
         file_serializer = FileSerializer(data=request.data)
         if file_serializer.is_valid():
             file_serializer.save(user_id=user_id)
-            file_id=file_serializer.instance.id
+            file_id = file_serializer.instance.id
             with transaction.atomic():
                 try:
                     with open(file_serializer.instance.file.path, 'r') as f:
@@ -209,11 +208,14 @@ class UplodeFileView(APIView):
                             product_id = row['Item_ID']
                             # Check if order id is unique
                             # Create order
-                            order_data = {'id': order_id, 'date': row['date'],"files_id":file_id}
-                            order = Order.objects.update_or_create(**order_data)
+                            order_data = {
+                                'id': order_id, 'date': row['date'], "files_id": file_id}
+                            order = Order.objects.update_or_create(
+                                **order_data)
 
                             # Create product order
-                            product_order_data = {'order_id': order_id, 'product_id': product_id, 'quantity': row['Quantity']}
+                            product_order_data = {
+                                'order_id': order_id, 'product_id': product_id, 'quantity': row['Quantity']}
                             ProductOrder.objects.create(**product_order_data)
                     file_serializer.save(status="File uploaded successfully")
                     return Response({'success': 'File uploaded successfully.'}, status=status.HTTP_201_CREATED)
@@ -224,6 +226,7 @@ class UplodeFileView(APIView):
         else:
             return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class UserFilesView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -232,6 +235,7 @@ class UserFilesView(APIView):
         files = Files.objects.all()
         serializer = FileListSerializer(files, many=True)
         return Response(serializer.data)
+
 
 class FileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -250,7 +254,7 @@ class FileView(APIView):
         return response
 
     def delete(self, request, uuid):
-        
+
         user = request.user
         file = get_object_or_404(Files, id=uuid)
         file_path = file.file.path

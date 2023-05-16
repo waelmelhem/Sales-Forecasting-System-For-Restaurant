@@ -24,11 +24,11 @@ class Product(models.Model):
 
 class Order(models.Model):
     id = models.AutoField(primary_key=True)
-    date = models.DateTimeField(auto_now_add=False)
-    files = models.ForeignKey(Files, on_delete=models.CASCADE,default=0)
+    date = models.DateTimeField(auto_now_add=False, db_index=True)
+    files = models.ForeignKey(Files, on_delete=models.CASCADE, default=0)
+    
     def __str__(self):
         return f"Order {self.id} - {self.date}"
-
 
 class ProductOrder(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
