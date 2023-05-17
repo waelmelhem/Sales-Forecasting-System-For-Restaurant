@@ -1,6 +1,7 @@
 
 graduation_project
 The technology used for this project includes React for the frontend and Django with a RESTful API for the backend.
+And use XGBOOST for tranning models.
 The system includes the following components:
 
 Login Page: A page where users can log in to access the system.
