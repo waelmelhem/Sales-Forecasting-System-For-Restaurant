@@ -38,20 +38,8 @@ class get_product(generics.ListAPIView):
     def get(self, request):
         min_weekly_sales = 20
         # group ProductOrder by week and product, and annotate with the sum of quantity
-        sales_by_week = (
-            ProductOrder.objects
-            .annotate(week=TruncWeek('order__date'))
-            .values('product', 'week')
-            .annotate(sales=Sum('quantity'))
-            .filter(
-                Q(sales__gt=20))
-            .values('product')
-            .distinct()
-        )
-        queryset = Product.objects.filter(
-            id__in=[i["product"] for i in sales_by_week])
-        serializer = ProductSerializer(queryset, many=True)
-        return Response(serializer.data)
+        product = Product.objects.filter(can_predict=True).values('id','name','price')
+        return Response(product)
 
 
 class PredictProductsView(APIView):
@@ -79,8 +67,8 @@ class PredictProductsView(APIView):
                 result[len(result)-1][last_monday.strftime("%Y-%m-%d")]["input"]["Last_week"][0])
             last_monday = (last_monday - timedelta(days=7)
                            ).replace(hour=0, minute=0, second=0, microsecond=0)
-        for dic in result:
-            dic[[*dic][0]].pop("input")
+        # for dic in result:
+        #     dic[[*dic][0]].pop("input")
         result.reverse()
         response_data = {
             # "last_order_date":last_order_date,
@@ -91,6 +79,51 @@ class PredictProductsView(APIView):
         }
 
         return Response(response_data)
+
+
+class CorrelatedView(APIView):
+    # permission_classes = [IsAdminUser]
+
+    def get(self, request, product_id):
+        product = get_object_or_404(Product, pk=product_id)
+        if not product:
+            raise NotFound("Product does not exist")
+        # Extract the actual sales values from the sales data
+        result=[]
+        df_corr_dishes=pd.read_csv('AI_models/corrItems.csv')
+        df_corr_dishes.set_index("item",inplace = True)
+        df_recommended_dishes = return_recommended_dishes(df_corr_dishes, dish_to_recommend_to = [product.name]).reset_index()
+        
+        # result=df_recommended_dishes.head(5)
+        response_data = {
+            # "last_order_date":last_order_date,
+            # "last_monday":last_monday,
+            # "last_week_monday":last_week_monday,
+            "product": ProductSerializer(product).data,
+            "result": df_recommended_dishes.head(5),
+        }
+
+        return Response(response_data)
+def return_recommended_dishes(df_corr_dishes, dish_to_recommend_to):
+    '''
+    Takes an input correlation dataframe and a set of at least one dish to return a sorted dataframe with recommended dishes and their score
+    '''
+    df_recommend_output = df_corr_dishes[dish_to_recommend_to]
+    df_recommend_output['Percentag of correlation'] = df_recommend_output.mean(axis = 1)
+
+    # sort by score
+    df_recommend_output.sort_values(by= 'Percentag of correlation', ascending = False, inplace = True)
+
+    # remove the first x items since they are the items in the list
+    df_recommend_output = df_recommend_output.iloc[2:,:]
+    #only show the score (total correlation)
+    df_recommend_output[['Percentag of correlation']].head(5)
+    
+    return ( df_recommend_output[['Percentag of correlation']].round(2) + 1)*50
+
+
+
+
 
 
 class PredictOrdersView(APIView):

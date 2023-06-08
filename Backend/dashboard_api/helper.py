@@ -1,14 +1,17 @@
+from django.db.models.functions import Trunc
 from datetime import datetime, timedelta
 import joblib
 import numpy as np
 import pandas as pd
-from .models import ProductOrder, Order
+from .models import ProductOrder, Order,Product
 from django.db.models import Sum
 
 
 def predict_orders_for_one_week(day_date):
-    last_week_day = (day_date - timedelta(days=7)).replace(hour=0, minute=0, second=0, microsecond=0)
-    yesterday = yesterday = (day_date - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    last_week_day = (day_date - timedelta(days=7)
+                     ).replace(hour=0, minute=0, second=0, microsecond=0)
+    yesterday = yesterday = (day_date - timedelta(days=1)
+                             ).replace(hour=0, minute=0, second=0, microsecond=0)
     day_of_year = day_date.timetuple().tm_yday
     year = day_date.year
     day_of_month = day_date.day
@@ -17,7 +20,7 @@ def predict_orders_for_one_week(day_date):
     dayofweek = day_date.weekday()
     weekofyear = day_date.isocalendar()[1]
     last_week_sum = week_orders(day_date)
-    month=day_date.month
+    month = day_date.month
     data = pd.DataFrame({
         'last_week_value': [last_week_value],
         'dayofweek': [dayofweek],
@@ -25,12 +28,12 @@ def predict_orders_for_one_week(day_date):
         'dayofyear': [day_of_year],
         "weekofyear": [weekofyear],
         'dayofmonth': [day_of_month],
-        "last_week_sum":[last_week_sum],
+        "last_week_sum": [last_week_sum],
         'yesterday_number': [yesterday_number],
-        "month":[month],
+        "month": [month],
     })
     model = joblib.load('AI_models/Forcasting_orders_sales.pkl')
-    
+
     return {
         "predict": model.predict(data).tolist()[0],
         "input": {
@@ -42,11 +45,11 @@ def predict_orders_for_one_week(day_date):
             'last_week_sum': [last_week_sum],
             'dayofmonth': [day_of_month],
             'yesterday_number': [yesterday_number],
-            "month":[month],
+            "month": [month],
         }
     }
 
-from django.db.models.functions import Trunc
+
 def day_orders(day_date):
     next_day = day_date + timedelta(days=1)
     return Order.objects.filter(date__range=(day_date, next_day)).count()
@@ -68,26 +71,53 @@ def predict_product_for_one_week(product_id, week_date):
 
     last_month_sales = sales_of_last_month(product_id, week_date)
     week_num = week_date.isocalendar()[1]
-    data = pd.DataFrame({
-        'Last_week': [last_week_sales],
+    month = week_date.month
+    p=Product.objects.get(id=product_id)
+    
+    data = data = pd.DataFrame({
         'Last_month': [last_month_sales],
-        'Item_ID': [product_id],
-        'dayofmonth': [day_of_month],
+        'Last_week': [last_week_sales],
+        'month': [month],
         'year': [year],
+        'dayofyear': [day_of_year],
+        'dayofmonth': [day_of_month],
         "weekofyear": week_num,
-        'dayofyear': [day_of_year]
+        'bombay aloo': 0,
+        'butter chicken': 0,
+        'chapati':0,
+        'chicken tikka (main)': 0,
+        'chicken tikka masala': 0,
+        'curry':0,
+        'garlic naan': 0,
+        'keema naan': 0,
+        'korma': 0,
+        'korma - chicken': 0,
+        'madras': 0,
+        'mango chutney': 0,
+        'meat samosa': 0,
+        'mini bhaji': 0,
+        'mint sauce': 0,
+        'mushroom rice': 0,
+        'naan': 0,
+        'onion bhaji': 0,
+        'onion chutney': 0,
+        'peshwari naan': 0,
+        'pilau rice': 0,
+        'plain papadum': 0,
+        'plain rice': 0,
+        'red sauce': 0,
+        'saag aloo': 0,
+        'special fried rice': 0,
+        'tandoori mixed grill': 0
+
     })
+    data[p.name]=1
     model = joblib.load('AI_models/Forcasting_product_sales.pkl')
     return {
         "predict": model.predict(data).tolist()[0],
         "input": {
-            'Last_month': [last_month_sales],
-            'Item': [product_id],
             'Last_week': [last_week_sales],
-            'dayofmonth': [day_of_month],
-            'year': [year],
-            'dayofyear': [day_of_year],
-            "weekOfYear": week_date.isocalendar()[1]
+            "da":data.to_dict(orient='dict')
         }}
 
 

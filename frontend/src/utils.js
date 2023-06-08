@@ -218,6 +218,24 @@ export async function get_product_Production(id) {
         status:response.status
     }
 }
+export async function get_product_Coor(id) {
+
+    let url=`${HOST_NAME}/api/correlations/${id}/`
+    await checkAccess();
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            "accept":"application/json",
+            "Authorization":`JWT ${localStorage.getItem("access")}`
+        }
+    });
+    // console.log(response);
+    return {
+        body:await response.json(),
+        status:response.status
+    }
+}
 export async function UplodeDataFile(label,file) {
     console.log(label,file)
     let url=`${HOST_NAME}/api/file/`

@@ -10,8 +10,9 @@ function NavBar(props) {
     useEffect(()=>{
         let _navStruct=[...select_nav_struct(localStorage.getItem('access'))];
         _navStruct=_navStruct.map((e)=>{
+            
             let path=location.pathname.split('/');
-            if(e.name.toLowerCase()===path[path.length-1]){
+            if(e.name.toLowerCase()===path[path.length-1].toLowerCase()){
                 e.isActive=true;
             }else e.isActive=false; 
             return e;
@@ -30,7 +31,7 @@ function NavBar(props) {
         <div className="navbar">
             <Link to={"/"}>
                 <div className="logo ">
-                    React Auth
+                Restaurant
                 </div>
             </Link>
             <div className="navbuttons ">

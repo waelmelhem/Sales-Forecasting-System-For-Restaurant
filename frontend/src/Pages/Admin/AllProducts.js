@@ -16,7 +16,7 @@ import {
     Tooltip,
     Legend,
 } from "chart.js";
-import { Line } from "react-chartjs-2";
+import { Line,Bar } from "react-chartjs-2";
 // import { predict } from "../../mock/api/predict";
 
 const style = {
@@ -40,13 +40,18 @@ ChartJS.register(
     Tooltip,
     Legend
 );
-import { getAllProduct, get_product_Production } from "../../utils";
+import { getAllProduct, get_product_Production,get_product_Coor } from "../../utils";
+import Chart from "./Chart";
+
 
 export default function AllProducts() {
+
     const [open, setOpen] = React.useState(false);
     const [name, setName] = React.useState(null);
     const [data,setData]=React.useState([]);
+    const [status,setStatus]=React.useState(0);
     const [predict,setPredict]=React.useState({result:[]});
+    const [corr,setCorr]=React.useState({result:[]});
     const handleClose = () => setOpen(false);
     const handleOpen = (row) => {
         let request =get_product_Production(row.id).then(response=>{
@@ -54,6 +59,17 @@ export default function AllProducts() {
             console.log(body,status)
             setPredict(body)
         });
+        setStatus(0)
+        setName(row.Name);
+        setOpen(true);
+    };
+    const handleOpen2 = (row) => {
+        let request =get_product_Coor(row.id).then(response=>{
+            let {body,status}=response;
+            console.log(body,status)
+            setCorr(body)
+        });
+        setStatus(1)
         setName(row.Name);
         setOpen(true);
     };
@@ -127,6 +143,7 @@ export default function AllProducts() {
             },
         ],
     };
+    
 
     return (
         <div style={{ height: "auto", width: "100%", position: "relative" }}>
@@ -155,7 +172,7 @@ export default function AllProducts() {
                                 <Button
                                     sx={{
                                         color: "white",
-                                        backgroundColor: "#4D5668",
+                                        backgroundColor: "#0D6943",
                                         padding: "7px",
                                         ":hover":{
                                             color: "#4D5668",
@@ -166,6 +183,30 @@ export default function AllProducts() {
                                     onClick={() => handleOpen(params.row)}
                                 >
                                     Predict
+                                </Button>
+                            );
+                        },
+                    },
+                    {
+                        field: "Correlations",
+                        headerName: "Correlations",
+                        width: 150 ,
+                        renderCell: (params) => {
+                            return (
+                                <Button
+                                    sx={{
+                                        color: "white",
+                                        backgroundColor: "#1C4874",
+                                        border: "1px;solid;#4D5668",
+                                        padding: "7px",
+                                        ":hover":{
+                                            color: "white",
+                                        backgroundColor: "#4D5668",
+                                        },
+                                    }}
+                                    onClick={() => handleOpen2(params.row)}
+                                >
+                                    Correlation
                                 </Button>
                             );
                         },
@@ -183,11 +224,18 @@ export default function AllProducts() {
             {
                 <Modal open={open} onClose={handleClose}>
                     <Box sx={style} >
+                        {status?
+                        <Chart
+                        title={corr.product?.name}
+                        labels={corr.result.item}
+                        data={corr.result["Percentag of correlation"]?corr.result["Percentag of correlation"].map(e=>e):corr.result["Percentag of correlation"]}
+                      />
+                    :
                         <Line
                             style={{ width: "100%" }}
                             options={options}
                             data={predictdata}
-                        />
+                        />}
                     </Box>
                 </Modal>
             }

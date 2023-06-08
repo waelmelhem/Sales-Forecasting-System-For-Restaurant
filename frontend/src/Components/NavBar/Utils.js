@@ -29,17 +29,17 @@ export const guest_nav_struct = [
 ]
 export const admin_nav_struct = [
     {
-        name: 'products',
+        name: 'Products',
         isActive: true,
         path: '/products',
     },
     {
-        name: 'orders',
+        name: 'Orders',
         isActive: false,
         path: '/orders',
     },
     {
-        name: 'Data ',
+        name: 'Data',
         isActive: false,
         path: '/data',
     },
